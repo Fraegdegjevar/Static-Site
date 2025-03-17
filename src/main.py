@@ -1,6 +1,7 @@
 from textnode import *
-from htmlnode import HTMLNode
+from htmlnode import *
 from functools import reduce
+
 
 def main():
     test_text_node = TextNode("This is some test text", TextType.BOLD, "http://google.co.uk")
