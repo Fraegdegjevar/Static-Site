@@ -1,13 +1,13 @@
 from textnode import *
 from htmlnode import *
-from functools import reduce
+from convert_md_to_textnodes import *
+from block_markdown import *
 
 
 def main():
-    test_text_node = TextNode("This is some test text", TextType.BOLD, "http://google.co.uk")
-    print(test_text_node)
-    test_html_node = HTMLNode(props = {"href": "https://www.google.com","target": "_blank", "img": "no_image"})
-    print(test_html_node)
-    #print(test_html_node)
+    pass
+
+def copy_src_to_dest_dir(source_dir, dest_dir):
+    pass
 
 main()

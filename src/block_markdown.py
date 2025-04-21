@@ -88,13 +88,13 @@ def block_to_html_node(block):
             node_children = block_text_to_children(block_text, False, "li")
             return ParentNode(tag="ol", children  =node_children)
         case (BlockType.CODE):
-            block_text = block[3:-3]
-            return ParentNode(tag="pre", children = ParentNode(tag="code", children = block_text_to_children(block_text, True)))
+            block_text = block[3:-3].strip()
+            return ParentNode(tag="pre", children = [ParentNode(tag="code", children = block_text_to_children(block_text, True))])
         case (BlockType.PARAGRAPH):
             return ParentNode(tag="p", children = block_text_to_children(block)) #no modification needed
         case (BlockType.HEADING):
             level = re.match(r"#{1,6}", block).group(0).count("#")
-            block_text = block[level:]
+            block_text = block[level + 1:] #+1 to skip the sapce following the #s
             return ParentNode(tag=f"h{level}", children = block_text_to_children(block_text))
 
 def markdown_to_html_node(markdown):

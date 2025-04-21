@@ -144,6 +144,11 @@ normal third item"""
             ParentNode("li", [LeafNode(None, "normal third item")])
             ]
         self.assertListEqual(expected_nodes, block_text_to_children(block, False, "li"))
+    
+    def test_wrap_empty_blocktext(self):
+        block = ""
+        expected_nodes = [ParentNode("li",[])]
+        self.assertListEqual(expected_nodes, block_text_to_children(block, False, "li"))
         
 
 class TestBlockToHtmlNode(unittest.TestCase):
@@ -162,6 +167,11 @@ class TestBlockToHtmlNode(unittest.TestCase):
         expected_node = ParentNode(tag="blockquote", children = expected_children)
         self.assertEqual(expected_node, block_to_html_node(block))
     
+    def test_empty_quote_block(self):
+        block = ">"
+        expected_node = ParentNode("blockquote", [])
+        self.assertEqual(expected_node, block_to_html_node(block))
+    
     def test_paragraph_with_md(self):
         block = """This is **just** a basic paragraph."""
         expected_children = [
@@ -170,6 +180,11 @@ class TestBlockToHtmlNode(unittest.TestCase):
             LeafNode(None, " a basic paragraph.")
         ]
         expected_node = ParentNode("p", expected_children)
+        self.assertEqual(expected_node, block_to_html_node(block))
+    
+    def test_empty_paragraph(self):
+        block = ""
+        expected_node = ParentNode("p", [])
         self.assertEqual(expected_node, block_to_html_node(block))
     
     def test_ord_list_with_md(self):
@@ -181,8 +196,120 @@ class TestBlockToHtmlNode(unittest.TestCase):
         ]
         expected_node = ParentNode("ol", expected_children)
         self.assertEqual(expected_node, block_to_html_node(block))
-
-        
     
-
+    def test_empty_ord_list(self):
+        block = """1. """
+        expected_children = [
+            ParentNode("li", [])
+        ]
+        expected_node = ParentNode("ol", expected_children)
+        self.assertEqual(expected_node, block_to_html_node(block))
     
+    def test_unord_list_with_md(self):
+        block = """- **First bold** first not bold
+- _Second italic_ second not italic"""
+        expected_children = [
+            ParentNode("li", [LeafNode("b", "First bold"), LeafNode(None, " first not bold")]),
+            ParentNode("li", [LeafNode("i", "Second italic"), LeafNode(None, " second not italic")])
+        ]
+        expected_node = ParentNode("ul", expected_children)
+        self.assertEqual(expected_node, block_to_html_node(block))
+    
+    def test_empty_unord_list(self):
+        block = """- """
+        expected_children = [
+            ParentNode("li", [])
+        ]
+        expected_node = ParentNode("ul", expected_children)
+        self.assertEqual(expected_node, block_to_html_node(block))
+    
+    def test_code_with_md(self):
+        block = """```
+        welcome to the house of **fun**xd_underscore_
+        ```"""
+        expected_children = [
+            LeafNode(None, "welcome to the house of **fun**xd_underscore_")
+        ]
+        expected_node = ParentNode("pre", [ParentNode("code", expected_children)])
+        self.assertEqual(expected_node, block_to_html_node(block))
+    
+    def test_empty_code_block(self):
+        block = "``````"
+        expected_children = [LeafNode(None, '')]
+        expected_node = ParentNode("pre", [ParentNode("code", expected_children)])
+        self.assertEqual(expected_node, block_to_html_node(block))
+    
+    def test_heading_block_with_md(self):
+        block = """#### intro **Heading 1**
+and `some code` and _italic_"""
+        expected_children = [
+            LeafNode(None, "intro "),
+            LeafNode("b", "Heading 1"),
+            LeafNode(None, "and "),
+            LeafNode("code", "some code"),
+            LeafNode(None, " and "),
+            LeafNode("i", "italic")
+            ]
+        expected_node = ParentNode("h4", expected_children)
+        self.assertEqual(expected_node, block_to_html_node(block))
+    
+    def heading_empty_block(self):
+        block = "### "
+        expected_children = []
+        expected_node = ParentNode("h3", [])
+        self.assertEqual(expected_node, block_to_html_node(block))
+
+class TestMarkDownToHtmlNode(unittest.TestCase):
+    def test_markdown_to_html_node(self):
+        markdown = """### Header 1
+`Some code`
+**bold shit**
+
+```Code section **lol**
+```
+
+1. item1
+2. item2
+3. _italic item 3_
+
+- unordered1
+- unordered2 **fancy bold**
+
+## Header **2**
+the last part"""
+        node = markdown_to_html_node(markdown)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><h3>Header 1<code>Some code</code><b>bold shit</b></h3><pre><code>Code section **lol**</code></pre><ol><li>item1</li><li>item2</li><li><i>italic item 3</i></li></ol><ul><li>unordered1</li><li>unordered2 <b>fancy bold</b></li></ul><h2>Header <b>2</b>the last part</h2></div>"
+        )
+    
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph 
+text in a p 
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+        )
+    
+    def test_codeblock(self):
+        md = """
+```
+This is text that _should_ remain 
+the **same** even with inline stuff
+```
+"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain the **same** even with inline stuff</code></pre></div>",
+    )
