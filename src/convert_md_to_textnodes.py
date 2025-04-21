@@ -33,7 +33,9 @@ def split_nodes_image(old_nodes):
         matches = extract_markdown_images(node.text)
         
         for match in matches:
-            match_strings = reduce(lambda acc, string: acc + [string] if isinstance(string, TextNode) else acc + list(string.partition(f'![{match[0]}]({match[1]})')), split_strings, [])
+            match_strings = reduce(lambda acc, string: 
+                acc + [string] if isinstance(string, TextNode) 
+                else acc + list(string.partition(f'![{match[0]}]({match[1]})')), split_strings, [])
             split_strings = [x for x in match_strings if x != '']
             
         for i in range(0, len(split_strings)):
@@ -106,8 +108,11 @@ def split_nodes_link(old_nodes):
         new_nodes.extend(node_list)
     return new_nodes
     
-            
-            
-            
-        
-        
+def text_to_textnodes(text):
+    nodes = split_nodes_link(TextNode(text, TextType.TEXT))
+    nodes = split_nodes_image2(nodes)
+    nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
+    nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
+    
+    return nodes
