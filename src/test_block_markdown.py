@@ -133,20 +133,17 @@ class TestBlockTextToChildren(unittest.TestCase):
         text = ""
         expected_nodes = []
         self.assertListEqual(expected_nodes, block_text_to_children(text))
-    
-class TestWrapChildHtmlNodes(unittest.TestCase):
+        
     def test_wrap_nodes(self):
-        html_nodes = [
-            LeafNode("b", "Bold first item"),
-            LeafNode("i", "italic second item"),
-            LeafNode(None, "normal third item")
-            ]
+        block = """**Bold first item**
+_italic second item_
+normal third item"""
         expected_nodes = [
-            ParentNode("li", LeafNode("b", "Bold first item")),
-            ParentNode("li", LeafNode("i", "italic second item")),
-            ParentNode("li", LeafNode(None, "normal third item"))
+            ParentNode("li", [LeafNode("b", "Bold first item")]),
+            ParentNode("li", [LeafNode("i", "italic second item")]),
+            ParentNode("li", [LeafNode(None, "normal third item")])
             ]
-        self.assertListEqual(expected_nodes, wrap_child_html_nodes(html_nodes, "li"))
+        self.assertListEqual(expected_nodes, block_text_to_children(block, False, "li"))
         
 
 class TestBlockToHtmlNode(unittest.TestCase):
@@ -176,6 +173,15 @@ class TestBlockToHtmlNode(unittest.TestCase):
         self.assertEqual(expected_node, block_to_html_node(block))
     
     def test_ord_list_with_md(self):
+        block = """1. **First bold** first not bold
+2. _Second italic_ second not italic"""
+        expected_children = [
+            ParentNode("li", [LeafNode("b", "First bold"), LeafNode(None, " first not bold")]),
+            ParentNode("li", [LeafNode("i", "Second italic"), LeafNode(None, " second not italic")])
+        ]
+        expected_node = ParentNode("ol", expected_children)
+        self.assertEqual(expected_node, block_to_html_node(block))
+
         
     
 

@@ -48,7 +48,7 @@ def block_to_blocktype(block):
         expected_num += 1
     return BlockType.ORDERED_LIST
 
-def block_text_to_children(block, ignore_markdown = False):
+def block_text_to_children(block, ignore_markdown = False, wrap = None):
     lines = block.split("\n")
     child_nodes = []
     
@@ -60,16 +60,19 @@ def block_text_to_children(block, ignore_markdown = False):
     
     for line in lines:
         # convert line to text nodes then convert them all to leaf nodes
-        child_text_nodes = [text_node_to_html_node(leaf) for leaf in text_to_textnodes(line)] 
-        child_nodes.extend(child_text_nodes)
+        child_text_nodes = [text_node_to_html_node(leaf) for leaf in text_to_textnodes(line)]
+        if wrap != None:
+            child_nodes.append(ParentNode("li", child_text_nodes))
+        else:
+            child_nodes.extend(child_text_nodes)
     
     return child_nodes
         
-def wrap_child_html_nodes(child_nodes, tag):
-    wrapped_child_nodes = []
-    for child in child_nodes:
-        wrapped_child_nodes.append(ParentNode(tag = tag, children = child))
-    return wrapped_child_nodes
+# def wrap_child_html_nodes(child_nodes, tag):
+#     wrapped_child_nodes = []
+#     for child in child_nodes:
+#         wrapped_child_nodes.append(ParentNode(tag = tag, children = child))
+#     return wrapped_child_nodes
 
 def block_to_html_node(block):
     match (block_to_blocktype(block)):
@@ -78,12 +81,12 @@ def block_to_html_node(block):
             return ParentNode(tag="blockquote", children = block_text_to_children(block_text))
         case (BlockType.UNORDERED_LIST):
             block_text = "\n".join(line[2:] for line in block.splitlines())
-            node_children = block_text_to_children(block_text)
-            return ParentNode(tag="ul", children = wrap_child_html_nodes(node_children, "li"))
+            node_children = block_text_to_children(block_text, False, "li")
+            return ParentNode(tag="ul", children = node_children)
         case (BlockType.ORDERED_LIST):
             block_text = "\n".join(line[3:] for line in block.splitlines())
-            node_children = block_text_to_children(block_text)
-            return ParentNode(tag="ol", children = wrap_child_html_nodes(node_children, "li"))
+            node_children = block_text_to_children(block_text, False, "li")
+            return ParentNode(tag="ol", children  =node_children)
         case (BlockType.CODE):
             block_text = block[3:-3]
             return ParentNode(tag="pre", children = ParentNode(tag="code", children = block_text_to_children(block_text, True)))
