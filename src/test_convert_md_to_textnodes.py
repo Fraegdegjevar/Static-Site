@@ -153,10 +153,10 @@ class TestTextToTextNodes(unittest.TestCase):
                 ]
         self.assertListEqual(expected_nodes, text_nodes)
     
-    def test_empty_string_returns_empty_node(self):
+    def test_empty_string_returns_empty_string(self):
         text = ""
         text_nodes = text_to_textnodes(text)
-        self.assertListEqual([TextNode('',TextType.TEXT)], text_nodes)
+        self.assertListEqual([], text_nodes)
     
     def test_string_no_markdown(self):
         text = "Just a normal string with no markdown!"
@@ -172,4 +172,26 @@ class TestTextToTextNodes(unittest.TestCase):
         text = "**Delims are *misplaced* and should mismatch!"
         with self.assertRaisesRegex(Exception,"Invalid Markdown! Mismatching delimiters. Did you forget a closing delimiter?"):
             text_to_textnodes(text)
+            
+    def test_repeated_md_type(self):
+        text = "_italic here_ and _italic again_ and then _the final italic_"
+        text_nodes = text_to_textnodes(text)
+        expected_nodes = [
+            TextNode("italic here", TextType.ITALIC),
+            TextNode(" and ", TextType.TEXT),
+            TextNode("italic again", TextType.ITALIC),
+            TextNode(" and then ", TextType.TEXT),
+            TextNode("the final italic", TextType.ITALIC)
+            ]
+        self.assertListEqual(expected_nodes,
+                             text_nodes)
+    
+    def test_image_at_start_of_string(self):
+        text = "![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) at start of string!"
+        text_nodes = text_to_textnodes(text)
+        expected_notes = [
+            TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" at start of string!", TextType.TEXT)
+        ]
+        self.assertListEqual(expected_notes, text_nodes)
         

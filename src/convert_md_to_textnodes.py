@@ -16,7 +16,7 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             # odd indexes are inside delims in the split string list
             for i in range(0,len(split_strings)):
                 split_strings[i] = TextNode(text = split_strings[i], text_type = TextType.TEXT if i % 2 == 0 else text_type)
-            new_nodes.extend(split_strings)
+            new_nodes.extend([node for node in split_strings if node.text_type != TextType.TEXT or node.text != ''])
                 
     return new_nodes
 
@@ -63,6 +63,8 @@ def split_node_text_on_images(node_text):
         split_string = match_split
     
     for string in split_string:
+        if string == '':
+            continue
         match = extract_markdown_images(string)
         if len(match) == 1:
             node_list.append(TextNode(text = match[0][0], text_type = TextType.IMAGE, url = match[0][1]))
@@ -87,6 +89,8 @@ def split_node_text_on_links(node_text):
         split_string = match_split
     
     for string in split_string:
+        if string == '':
+            continue
         match = extract_markdown_links(string)
         if len(match) == 1:
             node_list.append(TextNode(text = match[0][0], text_type = TextType.LINK, url = match[0][1]))
