@@ -97,6 +97,10 @@ def split_node_text_on_links(node_text):
 def split_nodes_image2(old_nodes):
     new_nodes = []
     for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            new_nodes.append(node)
+            continue
+        
         node_list = split_node_text_on_images(node.text)
         new_nodes.extend(node_list)
     return new_nodes
@@ -104,15 +108,17 @@ def split_nodes_image2(old_nodes):
 def split_nodes_link(old_nodes):
     new_nodes = []
     for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            new_nodes.append(node)
+            continue
         node_list = split_node_text_on_links(node.text)
         new_nodes.extend(node_list)
     return new_nodes
     
 def text_to_textnodes(text):
-    nodes = split_nodes_link(TextNode(text, TextType.TEXT))
-    nodes = split_nodes_image2(nodes)
+    nodes = split_nodes_image2([TextNode(text, TextType.TEXT)])
+    nodes = split_nodes_link(nodes)
     nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
     nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
     nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
-    
     return nodes
