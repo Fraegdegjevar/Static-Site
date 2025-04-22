@@ -77,7 +77,7 @@ def block_text_to_children(block, ignore_markdown = False, wrap = None):
 def block_to_html_node(block):
     match (block_to_blocktype(block)):
         case (BlockType.QUOTE):
-            block_text = "\n".join(line[1:] for line in block.splitlines())
+            block_text = "\n".join(line[1:].strip() for line in block.splitlines())
             return ParentNode(tag="blockquote", children = block_text_to_children(block_text))
         case (BlockType.UNORDERED_LIST):
             block_text = "\n".join(line[2:] for line in block.splitlines())
