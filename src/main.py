@@ -1,7 +1,3 @@
-from textnode import *
-from htmlnode import *
-from convert_md_to_textnodes import *
-from block_markdown import *
 from generate_public import *
 from generate_page import *
 import sys
